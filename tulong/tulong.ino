@@ -96,6 +96,7 @@ void setup()
     pinMode(shoot, OUTPUT);
     bluetooth.begin(9600);
 }
+
 int bluetoothWork()
 {
     // 如果蓝牙有数据可读
