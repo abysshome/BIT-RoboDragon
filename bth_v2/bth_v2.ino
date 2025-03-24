@@ -3,10 +3,10 @@
 #define BACK 2  // 后退
 #define LEFT 3  // 左转
 #define RIGHT 4 // 右转
-#define a1 2
-#define a2 3
-#define b1 4
-#define b2 5
+#define a1 2 // 左轮正传
+#define a2 3 // 左轮反转
+#define b1 4 // 右轮正转
+#define b2 5 // 右轮反转
 #define bluetooth Serial
 #define L_SENSE 7
 #define R_SENSE 8
@@ -271,7 +271,7 @@ int chaosb(){
             delay(50);       // 给足够时间后退
             Work(STOP, 0);
             delay(50);
-            continue; // 跳过其余的逻辑，重新测量距离
+            // continue; // 跳过其余的逻辑，重新测量距离
         }
 
         // 基于中间和右边距离决定行动
@@ -296,11 +296,11 @@ int chaosb(){
         }
         Serial.println("超声波");
 
-        // 检查蓝牙信号'D'退出功能
+        // 检查蓝牙信号'C'退出功能
         if (bluetooth.available())
         {
             char btCommand = bluetooth.read();
-            if (btCommand == 'D')
+            if (btCommand == 'C')
             {
                 Work(STOP, 0);
                 return 0; // 退出函数

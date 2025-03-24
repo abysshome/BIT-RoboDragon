@@ -17,47 +17,47 @@ void Work(int c, int value){
     {
     case 1 /* 前进*/:
         Serial.println("RUN"); // 前进输出状态
-        digitalWrite(2, 0x1);
-        digitalWrite(3, 0x0);
-        digitalWrite(4, 0x1);
-        digitalWrite(5, 0x0);
+        digitalWrite(2 /* 左轮正传*/, 0x1);
+        digitalWrite(3 /* 左轮反转*/, 0x0);
+        digitalWrite(4 /* 右轮正转*/, 0x1);
+        digitalWrite(5 /* 右轮反转*/, 0x0);
         break;
     case 2 /* 后退*/:
         Serial.println("BACK"); // 后退输出状态
-        digitalWrite(2, 0x0);
-        digitalWrite(3, 0x1);
-        digitalWrite(4, 0x0);
-        digitalWrite(5, 0x1);
+        digitalWrite(2 /* 左轮正传*/, 0x0);
+        digitalWrite(3 /* 左轮反转*/, 0x1);
+        digitalWrite(4 /* 右轮正转*/, 0x0);
+        digitalWrite(5 /* 右轮反转*/, 0x1);
         break;
     case 3 /* 左转*/:
         Serial.println("LEFT"); // 左转输出状态
-        digitalWrite(2, 0x0);
-        digitalWrite(3, 0x0);
-        digitalWrite(4, 0x1);
-        digitalWrite(5, 0x0);
+        digitalWrite(2 /* 左轮正传*/, 0x0);
+        digitalWrite(3 /* 左轮反转*/, 0x0);
+        digitalWrite(4 /* 右轮正转*/, 0x1);
+        digitalWrite(5 /* 右轮反转*/, 0x0);
         break;
     case 4 /* 右转*/:
         Serial.println("RIGHT"); // 右转弯输出状态
-        digitalWrite(2, 0x1);
-        digitalWrite(3, 0x0);
-        digitalWrite(4, 0x0);
-        digitalWrite(5, 0x0);
+        digitalWrite(2 /* 左轮正传*/, 0x1);
+        digitalWrite(3 /* 左轮反转*/, 0x0);
+        digitalWrite(4 /* 右轮正转*/, 0x0);
+        digitalWrite(5 /* 右轮反转*/, 0x0);
         break;
     default:
         Serial.println("STOP"); // 停止输出状态
-        digitalWrite(2, 0x0);
-        digitalWrite(3, 0x0);
-        digitalWrite(4, 0x0);
-        digitalWrite(5, 0x0);
+        digitalWrite(2 /* 左轮正传*/, 0x0);
+        digitalWrite(3 /* 左轮反转*/, 0x0);
+        digitalWrite(4 /* 右轮正转*/, 0x0);
+        digitalWrite(5 /* 右轮反转*/, 0x0);
     }
 }
 
 void setup(){
     // 设置电机引脚为输出模式
-    pinMode(2, 0x1);
-    pinMode(3, 0x1);
-    pinMode(4, 0x1);
-    pinMode(5, 0x1);
+    pinMode(2 /* 左轮正传*/, 0x1);
+    pinMode(3 /* 左轮反转*/, 0x1);
+    pinMode(4 /* 右轮正转*/, 0x1);
+    pinMode(5 /* 右轮反转*/, 0x1);
     pinMode(leftPWM, 0x1);
     pinMode(rightPWM, 0x1);
     pinMode(A2 /* 左边的超声波模块的触发引脚*/, 0x1);
@@ -250,7 +250,7 @@ int chaosb(){
             delay(50); // 给足够时间后退
             Work(0 /* 停止*/, 0);
             delay(50);
-            continue; // 跳过其余的逻辑，重新测量距离
+            // continue; // 跳过其余的逻辑，重新测量距离
         }
 
         // 基于中间和右边距离决定行动
@@ -275,11 +275,11 @@ int chaosb(){
         }
         Serial.println("超声波");
 
-        // 检查蓝牙信号'D'退出功能
+        // 检查蓝牙信号'C'退出功能
         if (Serial.available())
         {
             char btCommand = Serial.read();
-            if (btCommand == 'D')
+            if (btCommand == 'C')
             {
                 Work(0 /* 停止*/, 0);
                 return 0; // 退出函数
