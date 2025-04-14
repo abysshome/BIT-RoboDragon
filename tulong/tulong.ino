@@ -181,13 +181,13 @@ void hongwai()
     // 红外循迹
     while (1)
     {
+        
         L = digitalRead(L_SENSE);
         R = digitalRead(R_SENSE);
         L1 = digitalRead(L_SENSE1);
         R1 = digitalRead(R_SENSE1);
-
-        if (L1 == LOW && L == LOW && R == LOW && R1 == LOW)
-        { // 直走
+        Serial.println("left:" + String(L) + " right:" + String(R) + " left1:" + String(L1) + " right1:" + String(R1));
+        if ((L1 == LOW && L == LOW && R == LOW && R1 == LOW)){ // 直走
             if (lastDir == -2)
             {
                 Work(LEFT, 110);
@@ -202,55 +202,53 @@ void hongwai()
                 lastDir = 0;
             }
         }
-        else if ((L1 == LOW && L == LOW && R == LOW && R1 == HIGH) || (L1 == LOW && L == LOW && R == HIGH && R1 == HIGH) || (L1 == LOW && L == HIGH && R == HIGH && R1 == HIGH))
-        { // 大幅左转
-            Work(LEFT, 110);
-            lastDir = -2;
-        }
+        // else if(L1==LOW && L==LOW && R==HIGH && R1==HIGH){ // 右
+        //     Work(RIGHT, 110);
+        //     lastDir = 1;
+        // }
+        // else if(L1==HIGH && L==HIGH && R==LOW && R1==LOW){ // 左
+        //     Work(LEFT, 110);
+        //     lastDir = -1;
+        // }
         else if (L1 == LOW && L == LOW && R == HIGH && R1 == LOW)
         { // 一般左转
             Work(LEFT, 110);
             lastDir = -1;
-        }
-        else if ((L1 == HIGH && L == LOW && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == HIGH && R1 == LOW))
-        { // 大幅右转
-            Work(RIGHT, 110);
-            lastDir = 2;
         }
         else if (L1 == LOW && L == HIGH && R == LOW && R1 == LOW)
         { // 一般右转
             Work(RIGHT, 110);
             lastDir = 1;
         }
-        else if ((L1 == LOW && L == HIGH && R == LOW && R1 == HIGH))
-        {
-            Work(STOP, 0);
-            lastDir = 0; // 停止
+        //锐角，
+        else if (L1 == HIGH && R1 == LOW)
+        { // 锐角右转
+            Work(STOP,0);
+            delay(200);
+            Work(RIGHT, 150);
+            lastDir = 2;
+        }
+        else if (L1 == LOW && R1 == HIGH)
+        { // 锐角左转
+            Work(STOP,0);
+            delay(200);
+            Work(LEFT, 150);
+            lastDir = -2;
+        }
+        else if ((L1 == LOW && L == LOW && R == LOW && R1 == HIGH) || (L1 == LOW && L == LOW && R == HIGH && R1 == HIGH))
+        { // 大幅左转
+            Work(LEFT, 110);
+            lastDir = -2;
+        }
+        else if ((L1 == HIGH && L == LOW && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == LOW && R1 == LOW))
+        { // 大幅右转
+            Work(RIGHT, 110);
+            lastDir = 2;
         }
         else if (L1 == LOW && L == HIGH && R == HIGH && R1 == LOW)
         { // 直走
-            Work(RUN, 80);
+            Work(RUN, 50);
             lastDir = 0;
-        }
-        else if (L1 == HIGH && L == LOW && R == LOW && R1 == HIGH)
-        {
-            Work(STOP, 0);
-            lastDir = 0; // 停止
-        }
-        else if (L1 == HIGH && L == LOW && R == HIGH && R1 == LOW)
-        {
-            Work(STOP, 0);
-            lastDir = 0; // 停止
-        }
-        else if (L1 == HIGH && L == LOW && R == HIGH && R1 == HIGH)
-        {
-            Work(STOP, 0);
-            lastDir = 0; // 停止
-        }
-        else if (L1 == HIGH && L == HIGH && R == LOW && R1 == HIGH)
-        {
-            Work(STOP, 0);
-            lastDir = 0; // 停止
         }
         else if (L1 == HIGH && L == HIGH && R == HIGH && R1 == HIGH)
         {
@@ -275,7 +273,7 @@ void hongwai()
         delay(20);
         Work(STOP, 0);
         delay(20);
-        Serial.println("红外循迹");
+        Serial.println("红外循迹1");
     }
 }
 
