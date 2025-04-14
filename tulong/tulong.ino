@@ -96,8 +96,12 @@ void setup()
     pinMode(R_SENSE, INPUT);
     pinMode(L_SENSE1, INPUT);
     pinMode(R_SENSE1, INPUT);
+
     myservo.attach(shoot); // 設定要將伺服馬達接到哪一個PIN腳
     bluetooth.begin(9600);
+
+    myservo.write(90); // 旋轉到90度
+    delay(1000);
 }
 
 // 新增舵机控制函数
