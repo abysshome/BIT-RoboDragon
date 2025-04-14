@@ -3,6 +3,7 @@
 #define BACK 2  // 后退
 #define LEFT 3  // 左转
 #define RIGHT 4 // 右转
+
 #define a1 2
 #define a2 3
 #define b1 4
@@ -20,6 +21,8 @@
 #define ECHO3 A1     // 右边的超声波模块的回响引脚
 #define THRESHOLD 20 // 定义避障的阈值（单位为厘米）
 #define shoot 12
+
+Servo myservo; // 建立SERVO物件
 
 int L = 0;
 int R = 0;
@@ -93,8 +96,17 @@ void setup()
     pinMode(R_SENSE, INPUT);
     pinMode(L_SENSE1, INPUT);
     pinMode(R_SENSE1, INPUT);
-    pinMode(shoot, OUTPUT);
+    myservo.attach(shoot); // 設定要將伺服馬達接到哪一個PIN腳
     bluetooth.begin(9600);
+}
+
+// 新增舵机控制函数
+void controlServo()
+{
+    myservo.write(0); // 旋轉到0度，就是一般所說的歸零
+    delay(1000);
+    myservo.write(90); // 旋轉到90度
+    delay(10000);
 }
 
 int bluetoothWork()
@@ -129,6 +141,9 @@ int bluetoothWork()
                 digitalWrite(shoot, HIGH);
                 delay(2000);
                 digitalWrite(shoot, LOW);
+                break;
+            case 'E': // 新增舵机控制命令
+                controlServo();
                 break;
             default: // 其他情况，停止
                 Work(STOP, 0);
@@ -171,33 +186,36 @@ void hongwai()
         { // 直走
             if (lastDir == -2)
             {
-                Work(LEFT, 100);
+                Work(LEFT, 110);
             }
             else if (lastDir == 2)
             {
-                Work(RIGHT, 100);
+                Work(RIGHT, 110);
             }
-            Work(RUN, 75);
-            lastDir = 0;
+            else
+            {
+                Work(RUN, 80);
+                lastDir = 0;
+            }
         }
-        else if ((L1 == LOW && L == LOW && R == LOW && R1 == HIGH) || (L1 == LOW && L == LOW && R == HIGH && R1 == HIGH) || (L1 == LOW &&L == HIGH && R == HIGH && R1 == HIGH))
+        else if ((L1 == LOW && L == LOW && R == LOW && R1 == HIGH) || (L1 == LOW && L == LOW && R == HIGH && R1 == HIGH) || (L1 == LOW && L == HIGH && R == HIGH && R1 == HIGH))
         { // 大幅左转
-            Work(LEFT, 100);
+            Work(LEFT, 110);
             lastDir = -2;
         }
         else if (L1 == LOW && L == LOW && R == HIGH && R1 == LOW)
         { // 一般左转
-            Work(LEFT, 100);
+            Work(LEFT, 110);
             lastDir = -1;
         }
         else if ((L1 == HIGH && L == LOW && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == HIGH && R1 == LOW))
         { // 大幅右转
-            Work(RIGHT, 100);
+            Work(RIGHT, 110);
             lastDir = 2;
         }
         else if (L1 == LOW && L == HIGH && R == LOW && R1 == LOW)
         { // 一般右转
-            Work(RIGHT, 100);
+            Work(RIGHT, 110);
             lastDir = 1;
         }
         else if ((L1 == LOW && L == HIGH && R == LOW && R1 == HIGH))
@@ -207,7 +225,7 @@ void hongwai()
         }
         else if (L1 == LOW && L == HIGH && R == HIGH && R1 == LOW)
         { // 直走
-            Work(RUN, 75);
+            Work(RUN, 80);
             lastDir = 0;
         }
         else if (L1 == HIGH && L == LOW && R == LOW && R1 == HIGH)
@@ -276,7 +294,7 @@ int chaosb()
             delay(50);       // 给足够时间后退
             Work(STOP, 0);
             delay(50);
-            continue; // 跳过其余的逻辑，重新测量距离
+            // continue; // 跳过其余的逻辑，重新测量距离
         }
 
         // 基于中间和右边距离决定行动
