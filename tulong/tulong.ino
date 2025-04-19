@@ -1,3 +1,5 @@
+#include "Servo.h"
+
 #define STOP 0  // 停止
 #define RUN 1   // 前进
 #define BACK 2  // 后退
@@ -11,8 +13,8 @@
 #define bluetooth Serial
 #define L_SENSE 7
 #define R_SENSE 8
-#define L_SENSE1 6
-#define R_SENSE1 9
+#define L_SENSE1 12
+#define R_SENSE1 13
 #define TRIG1 A2     // 左边的超声波模块的触发引脚
 #define ECHO1 A3     // 左边的超声波模块的回响引脚
 #define TRIG2 A4     // 中间的超声波模块的触发引脚
@@ -20,7 +22,7 @@
 #define TRIG3 A0     // 右边的超声波模块的触发引脚
 #define ECHO3 A1     // 右边的超声波模块的回响引脚
 #define THRESHOLD 20 // 定义避障的阈值（单位为厘米）
-#define shoot 12
+#define shoot 10
 
 Servo myservo; // 建立SERVO物件
 
@@ -31,7 +33,7 @@ int R1 = 0;
 
 char data;
 
-int leftPWM = 10;  // L298N使能端左
+int leftPWM = 6;  // L298N使能端左
 int rightPWM = 11; // L298N使能端右
 
 void Work(int c, int value)
@@ -96,25 +98,25 @@ void setup()
     pinMode(R_SENSE, INPUT);
     pinMode(L_SENSE1, INPUT);
     pinMode(R_SENSE1, INPUT);
-
-    myservo.attach(shoot); // 設定要將伺服馬達接到哪一個PIN腳
+    myservo.attach(10); // 設定要將伺服馬達接到哪一個PIN腳
     bluetooth.begin(9600);
-
-    myservo.write(90); // 旋轉到90度
-    delay(1000);
 }
 
 // 新增舵机控制函数
 void controlServo()
 {
-    myservo.write(0); // 旋轉到0度，就是一般所說的歸零
+    Serial.println("舵机旋转");
+    boolean flag=myservo.attached();
+    Serial.println(String(flag));
+    myservo.write(90); // 旋轉到0度，就是一般所說的歸零
     delay(1000);
-    myservo.write(90); // 旋轉到90度
-    delay(10000);
+    myservo.write(0); // 旋轉到90度
+    delay(1000);
 }
 
 int bluetoothWork()
 {
+     Serial.println("第三关");
     // 如果蓝牙有数据可读
     while (1)
     {
@@ -140,11 +142,6 @@ int bluetoothWork()
                 break;
             case 'S': // 停止
                 Work(STOP, 0);
-                break;
-            case 'A':
-                digitalWrite(shoot, HIGH);
-                delay(2000);
-                digitalWrite(shoot, LOW);
                 break;
             case 'E': // 新增舵机控制命令
                 controlServo();
@@ -181,13 +178,13 @@ void hongwai()
     // 红外循迹
     while (1)
     {
-        
         L = digitalRead(L_SENSE);
         R = digitalRead(R_SENSE);
         L1 = digitalRead(L_SENSE1);
         R1 = digitalRead(R_SENSE1);
-        Serial.println("left:" + String(L) + " right:" + String(R) + " left1:" + String(L1) + " right1:" + String(R1));
-        if ((L1 == LOW && L == LOW && R == LOW && R1 == LOW)){ // 直走
+
+        if (L1 == LOW && L == LOW && R == LOW && R1 == LOW)
+        { // 直走
             if (lastDir == -2)
             {
                 Work(LEFT, 110);
@@ -202,53 +199,55 @@ void hongwai()
                 lastDir = 0;
             }
         }
-        // else if(L1==LOW && L==LOW && R==HIGH && R1==HIGH){ // 右
-        //     Work(RIGHT, 110);
-        //     lastDir = 1;
-        // }
-        // else if(L1==HIGH && L==HIGH && R==LOW && R1==LOW){ // 左
-        //     Work(LEFT, 110);
-        //     lastDir = -1;
-        // }
+        else if ((L1 == LOW && L == LOW && R == LOW && R1 == HIGH) || (L1 == LOW && L == LOW && R == HIGH && R1 == HIGH) || (L1 == LOW && L == HIGH && R == HIGH && R1 == HIGH))
+        { // 大幅左转
+            Work(LEFT, 110);
+            lastDir = -2;
+        }
         else if (L1 == LOW && L == LOW && R == HIGH && R1 == LOW)
         { // 一般左转
             Work(LEFT, 110);
             lastDir = -1;
+        }
+        else if ((L1 == HIGH && L == LOW && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == HIGH && R1 == LOW))
+        { // 大幅右转
+            Work(RIGHT, 110);
+            lastDir = 2;
         }
         else if (L1 == LOW && L == HIGH && R == LOW && R1 == LOW)
         { // 一般右转
             Work(RIGHT, 110);
             lastDir = 1;
         }
-        //锐角，
-        else if (L1 == HIGH && R1 == LOW)
-        { // 锐角右转
-            Work(STOP,0);
-            delay(200);
-            Work(RIGHT, 150);
-            lastDir = 2;
-        }
-        else if (L1 == LOW && R1 == HIGH)
-        { // 锐角左转
-            Work(STOP,0);
-            delay(200);
-            Work(LEFT, 150);
-            lastDir = -2;
-        }
-        else if ((L1 == LOW && L == LOW && R == LOW && R1 == HIGH) || (L1 == LOW && L == LOW && R == HIGH && R1 == HIGH))
-        { // 大幅左转
-            Work(LEFT, 110);
-            lastDir = -2;
-        }
-        else if ((L1 == HIGH && L == LOW && R == LOW && R1 == LOW) || (L1 == HIGH && L == HIGH && R == LOW && R1 == LOW))
-        { // 大幅右转
-            Work(RIGHT, 110);
-            lastDir = 2;
+        else if ((L1 == LOW && L == HIGH && R == LOW && R1 == HIGH))
+        {
+            Work(STOP, 0);
+            lastDir = 0; // 停止
         }
         else if (L1 == LOW && L == HIGH && R == HIGH && R1 == LOW)
         { // 直走
-            Work(RUN, 50);
+            Work(RUN, 80);
             lastDir = 0;
+        }
+        else if (L1 == HIGH && L == LOW && R == LOW && R1 == HIGH)
+        {
+            Work(STOP, 0);
+            lastDir = 0; // 停止
+        }
+        else if (L1 == HIGH && L == LOW && R == HIGH && R1 == LOW)
+        {
+            Work(STOP, 0);
+            lastDir = 0; // 停止
+        }
+        else if (L1 == HIGH && L == LOW && R == HIGH && R1 == HIGH)
+        {
+            Work(STOP, 0);
+            lastDir = 0; // 停止
+        }
+        else if (L1 == HIGH && L == HIGH && R == LOW && R1 == HIGH)
+        {
+            Work(STOP, 0);
+            lastDir = 0; // 停止
         }
         else if (L1 == HIGH && L == HIGH && R == HIGH && R1 == HIGH)
         {
@@ -273,7 +272,9 @@ void hongwai()
         delay(20);
         Work(STOP, 0);
         delay(20);
-        Serial.println("红外循迹1");
+        Serial.println("红外循迹");
+        //打印四个信号
+        Serial.println(String(L) + " " + String(R) + " " + String(L1) + " " + String(R1));
     }
 }
 
