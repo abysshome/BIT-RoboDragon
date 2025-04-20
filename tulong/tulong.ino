@@ -33,12 +33,12 @@ int R1 = 0;
 
 char data;
 
-int leftPWM = 6;  // L298N使能端左
+int leftPWM = 6;   // L298N使能端左
 int rightPWM = 11; // L298N使能端右
 
 void Work(int c, int value)
 {
-    analogWrite(leftPWM, value * 1.1); // 设置PWM输出，设置速度  (左右是定义反了）
+    analogWrite(leftPWM, value*1.2); // 设置PWM输出，设置速度  (左右是定义反了）
     analogWrite(rightPWM, value);
     switch (c)
     {
@@ -106,7 +106,7 @@ void setup()
 void controlServo()
 {
     Serial.println("舵机旋转");
-    boolean flag=myservo.attached();
+    boolean flag = myservo.attached();
     Serial.println(String(flag));
     myservo.write(90); // 旋轉到0度，就是一般所說的歸零
     delay(1000);
@@ -116,7 +116,7 @@ void controlServo()
 
 int bluetoothWork()
 {
-     Serial.println("第三关");
+    Serial.println("第三关");
     // 如果蓝牙有数据可读
     while (1)
     {
@@ -189,9 +189,17 @@ void hongwai()
             {
                 Work(LEFT, 110);
             }
+            else if (lastDir == -1)
+            {
+                Work(LEFT, 80);
+            }
             else if (lastDir == 2)
             {
                 Work(RIGHT, 110);
+            }
+            else if (lastDir == 1)
+            {
+                Work(RIGHT, 80);
             }
             else
             {
@@ -236,17 +244,17 @@ void hongwai()
         }
         else if (L1 == HIGH && L == LOW && R == HIGH && R1 == LOW)
         {
-            Work(STOP, 0);
+            Work(RUN, 80);
             lastDir = 0; // 停止
         }
         else if (L1 == HIGH && L == LOW && R == HIGH && R1 == HIGH)
         {
-            Work(STOP, 0);
+            Work(RUN, 80);
             lastDir = 0; // 停止
         }
         else if (L1 == HIGH && L == HIGH && R == LOW && R1 == HIGH)
         {
-            Work(STOP, 0);
+            Work(RUN, 80);
             lastDir = 0; // 停止
         }
         else if (L1 == HIGH && L == HIGH && R == HIGH && R1 == HIGH)
@@ -273,7 +281,7 @@ void hongwai()
         Work(STOP, 0);
         delay(20);
         Serial.println("红外循迹");
-        //打印四个信号
+        // 打印四个信号
         Serial.println(String(L) + " " + String(R) + " " + String(L1) + " " + String(R1));
     }
 }
@@ -291,7 +299,7 @@ int chaosb()
         Serial.println(distance3);
 
         // 特别处理distance1过小的情况
-        if (distance2 < 10)
+        if (distance1 < 10)
         {                    // 假设10cm是后退的临界距离
             Work(BACK, 100); // 后退
             delay(50);       // 给足够时间后退
@@ -301,9 +309,9 @@ int chaosb()
         }
 
         // 基于中间和右边距离决定行动
-        if (distance1 < 20 || distance3 < 20)
+        if (distance2 < 20 || distance3 < 20)
         { // 假设20cm是临界距离
-            if (distance1 > distance3)
+            if (distance2 > distance3)
             {
                 Work(RIGHT, 120); // 向左转
             }
@@ -317,8 +325,8 @@ int chaosb()
         }
         else
         {
-            Work(RUN, 90); // 如果没有检测到障碍物，就直行
-            delay(20);
+            Work(RUN, 70); // 如果没有检测到障碍物，就直行
+            delay(10);
         }
         Serial.println("超声波");
 
